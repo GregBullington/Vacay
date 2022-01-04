@@ -9,32 +9,47 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Vacay.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class AccountController : ControllerBase
+  [ApiController]
+  [Route("[controller]")]
+  public class AccountController : ControllerBase
+  {
+    private readonly AccountService _accountService;
+
+    public AccountController(AccountService accountService)
     {
-        private readonly AccountService _accountService;
-
-        public AccountController(AccountService accountService)
-        {
-            _accountService = accountService;
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<ActionResult<Account>> Get()
-        {
-            try
-            {
-                Account userInfo = await HttpContext.GetUserInfoAsync<Account>();
-                return Ok(_accountService.GetOrCreateProfile(userInfo));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
+      _accountService = accountService;
     }
 
+    [HttpGet]
+    [Authorize]
+    public async Task<ActionResult<Account>> Get()
+    {
+      try
+      {
+        Account userInfo = await HttpContext.GetUserInfoAsync<Account>();
+        return Ok(_accountService.GetOrCreateProfile(userInfo));
+      }
+      catch (Exception e)
+      {
+        return BadRequest(e.Message);
+      }
+    }
 
+    [HttpPut]
+    [Authorize]
+
+    public async Task<ActionResult<Account>> EditAsync([FromBody] Account editedAccount)
+    {
+      try
+      {
+        Account userInfo = await HttpContext.GetUserInfoAsync<Account>();
+        Account account = _accountService.Edit(editedAccount, userInfo.Id);
+        return Ok(editedAccount);
+      }
+      catch (Exception e)
+      {
+        return BadRequest(e.Message);
+      }
+    }
+  }
 }
